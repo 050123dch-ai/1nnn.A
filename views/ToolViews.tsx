@@ -5,7 +5,7 @@ import ImageEditor from '../components/ImageEditor';
 import { Button, Card, Spinner, Alert } from '../components/UIComponents';
 import { extractDocumentText, extractTableData, scanIDCard, extractHandwriting, removeHandwritingFromImage } from '../services/geminiService';
 import { FileText, Download, Copy, RefreshCw, FileSpreadsheet, Eye, Eraser, Edit2 } from 'lucide-react';
-import jsPDF from 'jspdf';
+import { jsPDF } from 'jspdf';
 
 // Custom save implementation to avoid dependency issues with file-saver in some environments
 const saveFile = (blob: Blob, name: string) => {
