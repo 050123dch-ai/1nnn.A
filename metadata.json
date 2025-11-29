@@ -1,0 +1,7 @@
+{
+  "name": "Copy of OmniScan Pro",
+  "description": "一款全能的AI图像处理工具。支持图片转PDF/Word、表格提取、证件扫描、手写笔记识别以及手写文字去除等功能。",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
