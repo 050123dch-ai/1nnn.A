@@ -5,6 +5,7 @@ import ImageEditor from '../components/ImageEditor';
 import { Button, Card, Spinner, Alert } from '../components/UIComponents';
 import { extractDocumentText, extractTableData, scanIDCard, extractHandwriting, removeHandwritingFromImage } from '../services/geminiService';
 import { FileText, Download, Copy, RefreshCw, FileSpreadsheet, Eye, Eraser, Edit2 } from 'lucide-react';
+import { jsPDF } from "jspdf";
 
 // Custom save implementation to avoid dependency issues with file-saver in some environments
 const saveFile = (blob: Blob, name: string) => {
@@ -21,21 +22,17 @@ const saveFile = (blob: Blob, name: string) => {
 // --- Helper Functions for Exports ---
 
 const exportToPDF = (content: string, title = 'Document') => {
-  // Use global jsPDF loaded via script tag in index.html
-  // @ts-ignore
-  if (!window.jspdf || !window.jspdf.jsPDF) {
-    alert("PDF库加载失败，请刷新页面重试");
-    return;
+  try {
+    const doc = new jsPDF();
+    // Basic text handling - Note: jsPDF default font doesn't support complex Chinese characters well out of the box without custom fonts.
+    // For this demo, we will try to use a basic method, but in production, you'd add a Chinese font.
+    const splitText = doc.splitTextToSize(content, 180);
+    doc.text(splitText, 15, 20);
+    doc.save(`${title}.pdf`);
+  } catch (e) {
+    console.error(e);
+    alert("PDF生成失败");
   }
-  
-  // @ts-ignore
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-  
-  // Basic text handling
-  const splitText = doc.splitTextToSize(content, 180);
-  doc.text(splitText, 15, 20);
-  doc.save(`${title}.pdf`);
 };
 
 const exportToWord = (content: string, title = 'Document') => {
