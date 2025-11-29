@@ -128,8 +128,9 @@ export const ConverterView: React.FC = () => {
     try {
       const text = await extractDocumentText(file.base64, file.mimeType);
       setState({ isLoading: false, error: null, result: text });
-    } catch (err) {
-      setState({ isLoading: false, error: "文档转换失败。", result: null });
+    } catch (err: any) {
+      console.error(err);
+      setState({ isLoading: false, error: err.message || "文档转换失败。", result: null });
     }
   };
 
@@ -181,8 +182,9 @@ export const TableExtractorView: React.FC = () => {
     try {
       const data: TableData = await extractTableData(file.base64, file.mimeType);
       setState({ isLoading: false, error: null, result: data });
-    } catch (err) {
-      setState({ isLoading: false, error: "表格提取失败。", result: null });
+    } catch (err: any) {
+      console.error(err);
+      setState({ isLoading: false, error: err.message || "表格提取失败。", result: null });
     }
   };
 
@@ -248,8 +250,9 @@ export const ScannerView: React.FC<{ mode: 'id' | 'ocr' }> = ({ mode }) => {
         const text = await extractHandwriting(file.base64, file.mimeType);
         setState({ isLoading: false, error: null, result: text });
       }
-    } catch (err) {
-      setState({ isLoading: false, error: "扫描识别失败。", result: null });
+    } catch (err: any) {
+      console.error(err);
+      setState({ isLoading: false, error: err.message || "扫描识别失败。", result: null });
     }
   };
 
@@ -325,9 +328,9 @@ export const HandwritingRemoverView: React.FC = () => {
     try {
       const base64Image = await removeHandwritingFromImage(file.base64, file.mimeType);
       setState({ isLoading: false, error: null, result: `data:image/png;base64,${base64Image}` });
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      setState({ isLoading: false, error: "去除手写失败，请重试。", result: null });
+      setState({ isLoading: false, error: err.message || "去除手写失败，请重试。", result: null });
     }
   };
 
