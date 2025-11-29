@@ -155,7 +155,8 @@ export const removeHandwritingFromImage = async (base64Data: string, mimeType: s
 
   // Extract the generated image from the response
   for (const part of response.candidates?.[0]?.content?.parts || []) {
-    if (part.inlineData) {
+    // Check if both inlineData and data are present to satisfy TS string return type
+    if (part.inlineData && part.inlineData.data) {
       return part.inlineData.data;
     }
   }

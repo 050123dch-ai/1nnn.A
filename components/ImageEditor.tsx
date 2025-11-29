@@ -18,7 +18,8 @@ const ImageEditor: React.FC<ImageEditorProps> = ({ imageSrc, onSave, onCancel })
   // Crop rect in percentages (0-100)
   const [cropRect, setCropRect] = useState({ x: 10, y: 10, w: 80, h: 80 });
   const containerRef = useRef<HTMLDivElement>(null);
-  const dragRef = useRef<{ startX: number; startY: number; startRect: typeof cropRect; type: 'move' | 'nw' | 'ne' | 'sw' | 'se' | null }>(null);
+  // Fix: Add | null to the generic type to make the ref mutable
+  const dragRef = useRef<{ startX: number; startY: number; startRect: typeof cropRect; type: 'move' | 'nw' | 'ne' | 'sw' | 'se' | null } | null>(null);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
