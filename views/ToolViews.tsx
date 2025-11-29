@@ -5,7 +5,6 @@ import ImageEditor from '../components/ImageEditor';
 import { Button, Card, Spinner, Alert } from '../components/UIComponents';
 import { extractDocumentText, extractTableData, scanIDCard, extractHandwriting, removeHandwritingFromImage } from '../services/geminiService';
 import { FileText, Download, Copy, RefreshCw, FileSpreadsheet, Eye, Eraser, Edit2 } from 'lucide-react';
-import { jsPDF } from 'jspdf';
 
 // Custom save implementation to avoid dependency issues with file-saver in some environments
 const saveFile = (blob: Blob, name: string) => {
@@ -22,11 +21,18 @@ const saveFile = (blob: Blob, name: string) => {
 // --- Helper Functions for Exports ---
 
 const exportToPDF = (content: string, title = 'Document') => {
+  // Use global jsPDF loaded via script tag in index.html
+  // @ts-ignore
+  if (!window.jspdf || !window.jspdf.jsPDF) {
+    alert("PDF库加载失败，请刷新页面重试");
+    return;
+  }
+  
+  // @ts-ignore
+  const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
-  // Add support for Chinese font handling (simplified for this demo, standard jsPDF lacks unicode)
-  // In a real app we'd load a font. For now, we warn or use raw.
-  // Note: Standard jsPDF will garble Chinese characters without a font. 
-  // We will assume the user knows this limitation or we just export text.
+  
+  // Basic text handling
   const splitText = doc.splitTextToSize(content, 180);
   doc.text(splitText, 15, 20);
   doc.save(`${title}.pdf`);
@@ -35,7 +41,7 @@ const exportToPDF = (content: string, title = 'Document') => {
 const exportToWord = (content: string, title = 'Document') => {
   const header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Export HTML to Word Document with JavaScript</title></head><body>";
   const footer = "</body></html>";
-  const sourceHTML = header + `<pre style="font-family: 'SimSun', 'Arial'; white-space: pre-wrap;">${content}</pre>` + footer;
+  const sourceHTML = header + `<pre style="font-family: 'SimSun', 'Arial'; white-space: pre-wrap; color: black;">${content}</pre>` + footer;
   
   const blob = new Blob(['\ufeff', sourceHTML], { type: 'application/msword' });
   saveFile(blob, `${title}.doc`);
