@@ -6,13 +6,17 @@ import { Button, Card, Spinner, Alert } from '../components/UIComponents';
 import { extractDocumentText, extractTableData, scanIDCard, extractHandwriting, removeHandwritingFromImage } from '../services/geminiService';
 import { FileText, Download, Copy, RefreshCw, FileSpreadsheet, Eye, Eraser, Edit2 } from 'lucide-react';
 import jsPDF from 'jspdf';
-import FileSaver from 'file-saver';
 
-// Handle file-saver export differences (default vs named)
+// Custom save implementation to avoid dependency issues with file-saver in some environments
 const saveFile = (blob: Blob, name: string) => {
-  // @ts-ignore
-  const saver = FileSaver.saveAs || FileSaver;
-  saver(blob, name);
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 };
 
 // --- Helper Functions for Exports ---
@@ -23,8 +27,6 @@ const exportToPDF = (content: string, title = 'Document') => {
   // In a real app we'd load a font. For now, we warn or use raw.
   // Note: Standard jsPDF will garble Chinese characters without a font. 
   // We will assume the user knows this limitation or we just export text.
-  // For better UX in a demo, we might skip true PDF generation for Chinese or just assume standard ascii for layout.
-  // Actually, let's keep it simple.
   const splitText = doc.splitTextToSize(content, 180);
   doc.text(splitText, 15, 20);
   doc.save(`${title}.pdf`);
@@ -33,7 +35,7 @@ const exportToPDF = (content: string, title = 'Document') => {
 const exportToWord = (content: string, title = 'Document') => {
   const header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Export HTML to Word Document with JavaScript</title></head><body>";
   const footer = "</body></html>";
-  const sourceHTML = header + `<pre style="font-family: 'SimSun', 'Arial';">${content}</pre>` + footer;
+  const sourceHTML = header + `<pre style="font-family: 'SimSun', 'Arial'; white-space: pre-wrap;">${content}</pre>` + footer;
   
   const blob = new Blob(['\ufeff', sourceHTML], { type: 'application/msword' });
   saveFile(blob, `${title}.doc`);
@@ -143,7 +145,7 @@ export const ConverterView: React.FC = () => {
 
         {state.result && (
           <Card title="处理结果" className="h-full flex flex-col">
-            <div className="flex-1 min-h-[300px] p-4 bg-gray-50 rounded border text-sm font-mono whitespace-pre-wrap overflow-auto max-h-[500px]">
+            <div className="flex-1 min-h-[300px] p-4 bg-gray-50 rounded border text-sm font-mono text-gray-900 whitespace-pre-wrap overflow-auto max-h-[500px]">
               {state.result}
             </div>
             <div className="mt-4 flex flex-wrap gap-2">
@@ -208,7 +210,7 @@ export const TableExtractorView: React.FC = () => {
                 {(state.result as TableData).rows.map((row, i) => (
                   <tr key={i}>
                     {row.map((cell, j) => (
-                      <td key={j} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{cell}</td>
+                      <td key={j} className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{cell}</td>
                     ))}
                   </tr>
                 ))}
@@ -280,7 +282,7 @@ export const ScannerView: React.FC<{ mode: 'id' | 'ocr' }> = ({ mode }) => {
              })}
           </div>
           {(state.result as IDCardData).rawText && (
-             <div className="mt-4 p-4 bg-gray-50 rounded border text-sm text-gray-600">
+             <div className="mt-4 p-4 bg-gray-50 rounded border text-sm text-gray-900">
                <div className="font-semibold mb-2 text-xs uppercase text-gray-400">原始文本</div>
                {(state.result as IDCardData).rawText}
              </div>
@@ -290,7 +292,7 @@ export const ScannerView: React.FC<{ mode: 'id' | 'ocr' }> = ({ mode }) => {
 
       {state.result && mode === 'ocr' && (
          <Card title="识别结果">
-            <div className="whitespace-pre-wrap p-4 bg-yellow-50 font-handwriting text-gray-800 rounded leading-relaxed border border-yellow-200">
+            <div className="whitespace-pre-wrap p-4 bg-yellow-50 font-handwriting text-gray-900 rounded leading-relaxed border border-yellow-200">
               {state.result}
             </div>
             <div className="mt-4 flex justify-end gap-2">
