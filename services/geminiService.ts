@@ -1,10 +1,20 @@
 import { GoogleGenAI, Type } from "@google/genai";
 
 const getAiClient = () => {
-  const apiKey = process.env.API_KEY;
-  if (!apiKey) {
-    throw new Error("API Key is missing. Please check your environment configuration.");
+  // 1. Try process.env.API_KEY (injected by Vite define at build time)
+  let apiKey = process.env.API_KEY;
+
+  // 2. Fallback: Check standard Vite env var at runtime if build injection missed it
+  // This handles cases where VITE_API_KEY is present but define replacement didn't pick it up
+  if (!apiKey && typeof import.meta !== 'undefined' && import.meta.env) {
+    apiKey = (import.meta.env as any).VITE_API_KEY;
   }
+
+  if (!apiKey) {
+    console.error("Critical: API Key is missing. Checked process.env.API_KEY and import.meta.env.VITE_API_KEY.");
+    throw new Error("API Key is missing. Please check your .env file or Vercel environment variables.");
+  }
+  
   return new GoogleGenAI({ apiKey });
 };
 
