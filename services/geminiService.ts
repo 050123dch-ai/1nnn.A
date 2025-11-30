@@ -5,9 +5,9 @@ const getAiClient = () => {
   let apiKey = process.env.API_KEY;
 
   // 2. Fallback: Check standard Vite env var at runtime if build injection missed it
-  // This handles cases where VITE_API_KEY is present but define replacement didn't pick it up
-  if (!apiKey && typeof import.meta !== 'undefined' && import.meta.env) {
-    apiKey = (import.meta.env as any).VITE_API_KEY;
+  // We cast import.meta to any to avoid TypeScript errors if vite/client types aren't fully loaded
+  if (!apiKey && typeof import.meta !== 'undefined' && (import.meta as any).env) {
+    apiKey = (import.meta as any).env.VITE_API_KEY;
   }
 
   if (!apiKey) {
